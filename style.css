@@ -1,1 +1,174 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Share Tech Mono', monospace;
+}
 
+body {
+    background-color: #050505;
+    color: #00ff41;
+    overflow: hidden;
+}
+
+/* MATRIX CANVAS */
+#matrixCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    opacity: 0.3;
+}
+
+/* YASHIRISH KLASI */
+.hidden { display: none !important; }
+
+/* LOGIN OYNA */
+.overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.login-box {
+    background: rgba(10, 10, 10, 0.9);
+    border: 1px solid #00ff41;
+    padding: 3rem;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    width: 400px;
+}
+
+.login-box h2 { color: #ff003c; margin-bottom: 1rem; font-size: 1.8rem; }
+.login-box p { color: #888; margin-bottom: 2rem; font-size: 0.9rem; }
+
+.login-box input {
+    width: 100%;
+    background: #000;
+    border: 1px solid #00ff41;
+    color: #00ff41;
+    padding: 10px;
+    margin-bottom: 15px;
+    outline: none;
+    text-align: center;
+    letter-spacing: 5px;
+}
+
+.login-box button {
+    width: 100%;
+    background: #00ff41;
+    color: #000;
+    border: none;
+    padding: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.login-box button:hover {
+    background: #fff;
+    box-shadow: 0 0 15px #00ff41;
+}
+
+.error-msg { color: #ff003c !important; margin-top: 10px; height: 20px; }
+
+/* DASHBOARD LAYOUT */
+#dashboard {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #00ff41;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; }
+.logo span { color: #fff; text-shadow: 0 0 5px #00ff41; }
+
+.stats { display: flex; gap: 30px; }
+.stat-box { font-size: 1.1rem; }
+.neon-text { color: #fff; text-shadow: 0 0 10px #00ff41; font-weight: bold; font-size: 1.3rem; }
+.online { color: #00ff41; animation: blink 1s infinite; }
+
+.logout-btn {
+    background: transparent;
+    color: #ff003c;
+    border: 1px solid #ff003c;
+    padding: 5px 15px;
+    cursor: pointer;
+}
+.logout-btn:hover { background: #ff003c; color: #000; }
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* ASOSIY QISM (Xarita va Jadval) */
+.main-content {
+    display: flex;
+    gap: 20px;
+    height: calc(100vh - 100px);
+}
+
+.panel-box {
+    background: rgba(0, 20, 0, 0.4);
+    border: 1px solid #00ff41;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-title {
+    background: rgba(0, 255, 65, 0.1);
+    padding: 10px;
+    border-bottom: 1px solid #00ff41;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+/* XARITA QISMI */
+.map-container { flex: 2; position: relative; }
+#map { width: 100%; height: calc(100% - 40px); background: #000; }
+
+/* Radar effekti */
+.radar-scanline {
+    position: absolute;
+    top: 40px; left: 0; width: 100%; height: 5px;
+    background: rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 20px 5px rgba(0, 255, 65, 0.4);
+    z-index: 1000;
+    pointer-events: none;
+    animation: scan 4s linear infinite;
+}
+
+@keyframes scan {
+    0% { top: 40px; }
+    50% { top: 100%; }
+    100% { top: 40px; }
+}
+
+/* JADVAL QISMI */
+.logs-container { flex: 1.5; display: flex; flex-direction: column; }
+.table-wrapper { overflow-y: auto; height: 100%; padding: 10px; }
+
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+th { color: #aaa; padding: 10px 5px; border-bottom: 1px dashed #00ff41; }
+td { padding: 10px 5px; border-bottom: 1px solid rgba(0, 255, 65, 0.2); word-break: break-all; }
+tr:hover { background: rgba(0, 255, 65, 0.1); }
+
+/* Scrollbar (Hakker stili) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #000; border-left: 1px solid #00ff41; }
+::-webkit-scrollbar-thumb { background: #00ff41; }
