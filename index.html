@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM.CORE // RADAR</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
 
+    <div id="loginScreen" class="overlay">
+        <div class="login-box">
+            <h2 class="glitch" data-text="KIRISH_TAQIQLANGAN">KIRISH_TAQIQLANGAN</h2>
+            <p>Tizimga kirish uchun maxfiy parolni kiriting</p>
+            <input type="password" id="adminPassword" placeholder="Parolni kiriting..." onkeypress="handleLogin(event)">
+            <button onclick="checkPassword()">TIZIMGA KIRISH</button>
+            <p id="loginError" class="error-msg"></p>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <header class="top-bar">
+            <div class="logo">RADAR<span>_SCAN</span></div>
+            <div class="stats">
+                <div class="stat-box">Jonli Nishonlar: <span id="liveCount" class="neon-text">0</span></div>
+                <div class="stat-box status">TIZIM: <span class="online">ONLINE</span></div>
+            </div>
+            <button class="logout-btn" onclick="logout()">CHIQISH</button>
+        </header>
+
+        <div class="main-content">
+            <div class="map-container panel-box">
+                <div class="panel-title">>> GLOBAL_RADAR_KUZATUV</div>
+                <div class="radar-scanline"></div> <div id="map"></div>
+            </div>
+
+            <div class="logs-container panel-box">
+                <div class="panel-title">>> QORA_QUTI_LOGLARI (LIVE)</div>
+                <div class="table-wrapper">
+                    <table id="logsTable">
+                        <thead>
+                            <tr>
+                                <th>VAQT</th>
+                                <th>IP MANZIL</th>
+                                <th>QURILMA / OS</th>
+                                <th>LOKATSIYA</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
