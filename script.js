@@ -4,7 +4,9 @@
 // SHU YERGA O'ZINGIZNING SUPABASE KALITLARINGIZNI QO'YING
 const supabaseUrl = 'https://zazmjpbblmhxtuvsxpkv.supabase.co';
 const supabaseKey = 'sb_publishable_NHR_h-RGmqChWD8g7kyR5g_Vh_e5L5d';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// O'zgaruvchi nomi 'supabaseClient' ga o'zgartirildi:
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // ==========================================
 // 2. MATRIX ORQA FON ANIMATSIYASI
@@ -42,7 +44,7 @@ setInterval(drawMatrix, 30);
 // ==========================================
 // 3. XAVFSIZLIK VA LOGIN TIZIMI
 // ==========================================
-const ADMIN_PASSWORD = "hakker777"; // Buni xohlagan parolingizga o'zgartiring
+const ADMIN_PASSWORD = "hakker777"; 
 
 function handleLogin(e) { if (e.key === 'Enter') checkPassword(); }
 
@@ -53,7 +55,7 @@ function checkPassword() {
     if (input === ADMIN_PASSWORD) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        initSystem(); // Login o'tgach xarita va bazani ishga tushiramiz
+        initSystem(); 
     } else {
         errorMsg.innerText = "XATOLIK: PAROL NOTO'G'RI!";
         setTimeout(() => { errorMsg.innerText = ""; }, 2000);
@@ -70,13 +72,11 @@ function logout() {
 // 4. RADAR XARITA VA JONLI LOGLAR (INIT)
 // ==========================================
 let map;
-let markers = L.layerGroup(); // Nishonlar guruhi
+let markers = L.layerGroup(); 
 
 async function initSystem() {
-    // 1. Leaflet Qora Xaritani o'rnatish
     if (!map) {
-        map = L.map('map').setView([41.2995, 69.2401], 4); // Dastlabki markaz (Toshkent/Osiyo)
-        // Qop-qora (Dark Matter) xarita plitkalari
+        map = L.map('map').setView([41.2995, 69.2401], 4); 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: 'Radar System v2.0',
             maxZoom: 19
@@ -84,19 +84,17 @@ async function initSystem() {
         markers.addTo(map);
     }
 
-    // 2. Supabase'dan eski loglarni yuklab olish
     fetchInitialData();
-
-    // 3. Supabase Realtime (Jonli kuzatuvni yoqish)
     subscribeToRealtime();
 }
 
 async function fetchInitialData() {
-    const { data, error } = await supabase
+    // supabase -> supabaseClient ga o'zgardi
+    const { data, error } = await supabaseClient
         .from('visitors')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(50); // Oxirgi 50 ta log
+        .limit(50); 
 
     if (error) {
         console.error("Bazadan yuklashda xato:", error);
@@ -111,15 +109,14 @@ async function fetchInitialData() {
 }
 
 function subscribeToRealtime() {
-    supabase.channel('custom-all-channel')
+    // supabase -> supabaseClient ga o'zgardi
+    supabaseClient.channel('custom-all-channel')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'visitors' }, payload => {
             console.log('JONLI NISHON ANIQLANDI!', payload.new);
             
-            // Statistikani yangilash
             const countEl = document.getElementById('liveCount');
             countEl.innerText = parseInt(countEl.innerText) + 1;
 
-            // Xarita va Jadvalga qo'shish
             addLogToTable(payload.new);
             plotOnRadar(payload.new);
         })
@@ -140,14 +137,12 @@ function addLogToTable(log) {
         <td style="color:#fff;">${log.device || 'Noma\'lum Qurilma'}</td>
         <td style="color:#ff003c;">${log.city || 'Kenglik: '+log.lat.toFixed(2)}</td>
     `;
-    // Yangi log eng tepaga tushishi uchun:
     tbody.insertBefore(row, tbody.firstChild); 
 }
 
 function plotOnRadar(log) {
-    if (!log.lat || !log.lon) return; // Koordinata bo'lmasa xaritaga qo'yilmaydi
+    if (!log.lat || !log.lon) return; 
 
-    // Qizil, yonib turadigan nishon efekti
     const radarIcon = L.divIcon({
         className: 'radar-marker',
         html: `<div style="width:15px; height:15px; background:red; border-radius:50%; box-shadow:0 0 10px red; animation: pulse 1s infinite;"></div>`,
@@ -162,6 +157,5 @@ function plotOnRadar(log) {
             Shahar: ${log.city}
         `);
     
-    // Yangi nishon chiqqanda xarita markazini o'shanga buramiz
     map.flyTo([log.lat, log.lon], 10, { animate: true, duration: 2 });
 }
