@@ -1,1 +1,1 @@
-# aipanel.com
+# aipanela2.github.io
