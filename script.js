@@ -2,8 +2,8 @@
 // 1. SUPABASE INTEGRATSIYASI
 // ==========================================
 // SHU YERGA O'ZINGIZNING SUPABASE KALITLARINGIZNI QO'YING
-const supabaseUrl = 'SIZNING_SUPABASE_URL_MANZILINGIZ';
-const supabaseKey = 'SIZNING_ANON_PUBLIC_KALITINGIZ';
+const supabaseUrl = 'https://zazmjpbblmhxtuvsxpkv.supabase.co';
+const supabaseKey = 'sb_publishable_NHR_h-RGmqChWD8g7kyR5g_Vh_e5L5d';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // ==========================================
