@@ -8,154 +8,168 @@ const supabaseKey = 'sb_publishable_NHR_h-RGmqChWD8g7kyR5g_Vh_e5L5d';
 // O'zgaruvchi nomi 'supabaseClient' ga o'zgartirildi:
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// ==========================================
-// 2. MATRIX ORQA FON ANIMATSIYASI
-// ==========================================
+// MATRIX EFFEKTI (Oldingidek)
 const canvas = document.getElementById('matrixCanvas');
 const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
-const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const nums = '0123456789';
-const alphabet = katakana + latin + nums;
-
-const fontSize = 16;
-const columns = canvas.width / fontSize;
+canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッン';
+const fontSize = 16; const columns = canvas.width / fontSize;
 const drops = Array(Math.floor(columns)).fill(1);
-
-function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#0F0';
-    ctx.font = fontSize + 'px monospace';
-
+setInterval(() => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0F0'; ctx.font = fontSize + 'px monospace';
     for (let i = 0; i < drops.length; i++) {
-        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        ctx.fillText(alphabet.charAt(Math.floor(Math.random() * alphabet.length)), i * fontSize, drops[i] * fontSize);
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
     }
-}
-setInterval(drawMatrix, 30);
+}, 30);
 
-// ==========================================
-// 3. XAVFSIZLIK VA LOGIN TIZIMI
-// ==========================================
-const ADMIN_PASSWORD = "hakker777"; 
-
+// LOGIN TIZIMI
+const ADMIN_PASSWORD = "hakker777";
 function handleLogin(e) { if (e.key === 'Enter') checkPassword(); }
-
 function checkPassword() {
-    const input = document.getElementById('adminPassword').value;
-    const errorMsg = document.getElementById('loginError');
-    
-    if (input === ADMIN_PASSWORD) {
+    if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
-        initSystem(); 
+        initSystem();
     } else {
-        errorMsg.innerText = "XATOLIK: PAROL NOTO'G'RI!";
-        setTimeout(() => { errorMsg.innerText = ""; }, 2000);
+        document.getElementById('loginError').innerText = "XATOLIK!";
+        setTimeout(() => document.getElementById('loginError').innerText = "", 2000);
     }
 }
+function logout() { location.reload(); }
 
-function logout() {
-    document.getElementById('dashboard').classList.add('hidden');
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('adminPassword').value = '';
-}
-
-// ==========================================
-// 4. RADAR XARITA VA JONLI LOGLAR (INIT)
-// ==========================================
-let map;
-let markers = L.layerGroup(); 
-
-async function initSystem() {
-    if (!map) {
-        map = L.map('map').setView([41.2995, 69.2401], 4); 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: 'Radar System v2.0',
-            maxZoom: 19
-        }).addTo(map);
-        markers.addTo(map);
-    }
-
-    fetchInitialData();
-    subscribeToRealtime();
-}
-
-async function fetchInitialData() {
-    // supabase -> supabaseClient ga o'zgardi
-    const { data, error } = await supabaseClient
-        .from('visitors')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50); 
-
-    if (error) {
-        console.error("Bazadan yuklashda xato:", error);
-        return;
-    }
+// TAB MENU LOGIKASI (Sahifalar o'rtasida o'tish)
+function switchTab(tabId, element) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+    document.querySelectorAll('.nav-menu li').forEach(li => li.classList.remove('active'));
+    document.getElementById(tabId).classList.remove('hidden');
+    element.classList.add('active');
     
-    document.getElementById('liveCount').innerText = data.length;
-    data.forEach(log => {
-        addLogToTable(log);
-        plotOnRadar(log);
-    });
+    if(tabId === 'tab-map' && map) {
+        setTimeout(() => map.invalidateSize(), 100); // Xaritani to'g'ri chizish
+    }
+    if(tabId === 'tab-chat') document.getElementById('chatBadge').innerText = '0';
+    if(tabId === 'tab-msg') document.getElementById('msgBadge').innerText = '0';
 }
 
-function subscribeToRealtime() {
-    // supabase -> supabaseClient ga o'zgardi
-    supabaseClient.channel('custom-all-channel')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'visitors' }, payload => {
-            console.log('JONLI NISHON ANIQLANDI!', payload.new);
-            
-            const countEl = document.getElementById('liveCount');
-            countEl.innerText = parseInt(countEl.innerText) + 1;
-
-            addLogToTable(payload.new);
-            plotOnRadar(payload.new);
-        })
-        .subscribe();
+// XARITA VA BAZA INITALIZATSIYASI
+let map; let markers = L.layerGroup();
+async function initSystem() {
+    initMap();
+    fetchVisitors();
+    fetchChats();
+    fetchMessages();
+    subscribeRealtime();
 }
 
-// ==========================================
-// YORDAMCHI FUNKSIYALAR
-// ==========================================
+function initMap() {
+    // 3 XIL XARITA LAYERLARI (Dark, Satellite, Hybrid)
+    const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 });
+    const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+    const hybridMap = L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', { maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'] });
+
+    map = L.map('map', { layers: [darkMap] }).setView([41.3, 69.2], 3);
+    
+    // O'ng tepada xarita turini tanlash tugmasi
+    const baseMaps = {
+        "MATRIX DARK": darkMap,
+        "SATELLITE (Real)": satelliteMap,
+        "HYBRID (Ko'cha)": hybridMap
+    };
+    L.control.layers(baseMaps).addTo(map);
+    markers.addTo(map);
+}
+
+// 1. QORA QUTI LOGLARI
+async function fetchVisitors() {
+    const { data } = await supabaseClient.from('visitors').select('*').order('created_at', { ascending: false });
+    if(data) data.forEach(log => { addLogToTable(log); plotOnRadar(log); });
+}
+
 function addLogToTable(log) {
     const tbody = document.getElementById('logsBody');
-    const time = new Date(log.created_at).toLocaleTimeString();
-    
     const row = document.createElement('tr');
     row.innerHTML = `
-        <td style="color:#aaa;">${time}</td>
-        <td style="color:#00cfff;">${log.ip || 'Yashirin'}</td>
-        <td style="color:#fff;">${log.device || 'Noma\'lum Qurilma'}</td>
-        <td style="color:#ff003c;">${log.city || 'Kenglik: '+log.lat.toFixed(2)}</td>
+        <td style="color:#aaa;">${new Date(log.created_at).toLocaleTimeString()}</td>
+        <td style="color:#ff003c;">${log.ip || 'Yashirin'}</td>
+        <td>${log.device || 'Noma\'lum'}</td>
+        <td><button class="track-btn" onclick="focusDevice(${log.lat}, ${log.lon}, '${log.ip}')">KUZATISH 🎯</button></td>
     `;
-    tbody.insertBefore(row, tbody.firstChild); 
+    tbody.insertBefore(row, tbody.firstChild);
 }
 
 function plotOnRadar(log) {
-    if (!log.lat || !log.lon) return; 
+    if (!log.lat || !log.lon) return;
+    const icon = L.divIcon({ className: 'radar-marker', html: `<div style="width:15px; height:15px; background:red; border-radius:50%; box-shadow:0 0 10px red; animation: pulse 1s infinite;"></div>` });
+    L.marker([log.lat, log.lon], { icon: icon }).addTo(markers).bindPopup(`<b style="color:red">${log.ip}</b><br>${log.device}`);
+}
 
-    const radarIcon = L.divIcon({
-        className: 'radar-marker',
-        html: `<div style="width:15px; height:15px; background:red; border-radius:50%; box-shadow:0 0 10px red; animation: pulse 1s infinite;"></div>`,
-        iconSize: [15, 15]
-    });
+// QURILMAGA ZOOM QILISH (Jadvaldan bosilganda)
+window.focusDevice = function(lat, lon, ip) {
+    switchTab('tab-map', document.querySelector('.nav-menu li:nth-child(1)'));
+    map.flyTo([lat, lon], 16, { animate: true, duration: 2 });
+}
 
-    L.marker([log.lat, log.lon], { icon: radarIcon })
-        .addTo(markers)
-        .bindPopup(`
-            <b style="color:red">NISHON: ${log.ip}</b><br>
-            Qurilma: ${log.device}<br>
-            Shahar: ${log.city}
-        `);
+// 2. CHAT KUZATUV
+async function fetchChats() {
+    const { data } = await supabaseClient.from('chat_logs').select('*').order('created_at', { ascending: true });
+    if(data) data.forEach(addChatToUI);
+}
+
+function addChatToUI(chat) {
+    const container = document.getElementById('chatContainer');
+    let group = document.getElementById('chat-group-' + chat.ip);
     
-    map.flyTo([log.lat, log.lon], 10, { animate: true, duration: 2 });
+    // Agar bu IP uchun guruh bo'lmasa, yangi yaratamiz
+    if (!group) {
+        group = document.createElement('div');
+        group.className = 'chat-group';
+        group.id = 'chat-group-' + chat.ip;
+        group.innerHTML = `<div class="chat-ip">Intercepted IP: ${chat.ip}</div><div class="chat-messages"></div>`;
+        container.insertBefore(group, container.firstChild);
+    }
+    
+    const msgBox = group.querySelector('.chat-messages');
+    const bubble = document.createElement('div');
+    bubble.className = `msg-bubble ${chat.sender === 'user' ? 'user-txt' : 'ai-txt'}`;
+    bubble.innerText = chat.message;
+    msgBox.appendChild(bubble);
+}
+
+// 3. XABARLAR (Murojaatlar)
+async function fetchMessages() {
+    const { data } = await supabaseClient.from('contact_messages').select('*').order('created_at', { ascending: false });
+    if(data) data.forEach(addMessageToUI);
+}
+
+function addMessageToUI(msg) {
+    const container = document.getElementById('msgContainer');
+    const card = document.createElement('div');
+    card.className = 'msg-card';
+    card.innerHTML = `
+        <div class="msg-title">Mavzu: ${msg.subject}</div>
+        <div class="msg-sender">Kimdan: ${msg.name} (${msg.email}) | Vaqt: ${new Date(msg.created_at).toLocaleTimeString()}</div>
+        <div class="msg-body">${msg.message}</div>
+    `;
+    card.onclick = () => card.classList.toggle('open');
+    container.insertBefore(card, container.firstChild);
+}
+
+// SUPABASE REALTIME (JONLI KUZATUV BARCHA JADVALLAR UCHUN)
+function subscribeRealtime() {
+    supabaseClient.channel('custom-all-channel')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'visitors' }, payload => {
+            addLogToTable(payload.new); plotOnRadar(payload.new);
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_logs' }, payload => {
+            addChatToUI(payload.new);
+            let badge = document.getElementById('chatBadge'); badge.innerText = parseInt(badge.innerText) + 1;
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'contact_messages' }, payload => {
+            addMessageToUI(payload.new);
+            let badge = document.getElementById('msgBadge'); badge.innerText = parseInt(badge.innerText) + 1;
+        })
+        .subscribe();
 }
