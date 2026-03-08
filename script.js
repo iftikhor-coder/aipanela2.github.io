@@ -92,6 +92,10 @@ function updateKillSwitchUI() {
 // ==========================================
 let map; let markers = L.layerGroup();
 let visitorMarkers = {}; // Xaritadagi nishonlarni ID bo'yicha saqlash
+let map; 
+let markers = L.layerGroup();
+let visitorMarkers = {}; 
+let routeLayer = L.layerGroup(); // YAngi: Marshrut va bayroqlar qatlami
 
 async function initSystem() {
     fetchSettings(); // Kill-switch holatini tortib olish
@@ -129,6 +133,7 @@ async function initSystem() {
         }).addTo(map);
         
         markers.addTo(map);
+        routeLayer.addTo(map); // SHUNI QO'SHING
     }
     fetchVisitors();
     fetchChats();
@@ -201,9 +206,84 @@ function plotOnRadar(log) {
     visitorMarkers[log.id] = newMarker;
 }
 
-window.focusDevice = function(lat, lon, ip) {
+// ==========================================
+// KIBER-FORENZIKA: MARSHRUT VA TO'XTASH (DWELL TIME) ALGORITMI
+// ==========================================
+
+window.focusDevice = async function(lat, lon, ip) {
     switchTab('tab-map', document.querySelector('.nav-menu li:nth-child(1)'));
     map.flyTo([lat, lon], 16, { animate: true, duration: 2 });
+
+    // Xaritadagi oldingi chiziqlar va bayroqlarni tozalaymiz
+    routeLayer.clearLayers();
+
+    // Qora Qutidan nishonning butun tarixini tortib olamiz
+    const { data: historyData } = await supabaseClient
+        .from('route_history')
+        .select('*')
+        .eq('visitor_ip', ip)
+        .order('recorded_at', { ascending: true });
+
+    if (historyData && historyData.length > 0) {
+        drawRouteAndFlags(historyData);
+    }
+}
+
+function drawRouteAndFlags(historyData) {
+    let latlngs = [];
+    let clusterStart = historyData[0];
+    let lastPoint = historyData[0];
+
+    // Yer shari radiusi bo'yicha metrda masofa hisoblovchi (Haversine formula)
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; const rad = Math.PI / 180;
+        const dLat = (lat2 - lat1) * rad; const dLon = (lon2 - lon1) * rad;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    historyData.forEach((point, index) => {
+        latlngs.push([point.lat, point.lon]);
+
+        let distance = getDistance(lastPoint.lat, lastPoint.lon, point.lat, point.lon);
+
+        // Agar 30 metrdan uzoqlashsa (harakatlansa) YOKI ro'yxat oxiriga yetsa
+        if (distance > 30 || index === historyData.length - 1) {
+            let startTime = new Date(clusterStart.recorded_at).getTime();
+            let endTime = new Date(lastPoint.recorded_at).getTime();
+            let diffMinutes = (endTime - startTime) / 1000 / 60; // Daqiqaga o'giramiz
+
+            // QIZIL BAYROQ: Agar 1 joyda 5 daqiqadan ko'p qotib turgan bo'lsa
+            if (diffMinutes >= 5) {
+                const flagIcon = L.divIcon({
+                    className: 'custom-flag',
+                    html: '<div style="font-size:20px; filter: drop-shadow(0 0 5px red);">🚩</div>',
+                    iconSize: [20, 20], iconAnchor: [10, 20]
+                });
+                
+                L.marker([clusterStart.lat, clusterStart.lon], { icon: flagIcon })
+                 .bindPopup(`
+                    <b style="color:#ff003c;">DIQQAT: Uzoq to'xtash!</b><br>
+                    ⏳ Qolgan vaqti: <b>${Math.round(diffMinutes)} daqiqa</b><br>
+                    🕒 Keldi: ${new Date(startTime).toLocaleTimeString()}<br>
+                    🕒 Ketdi: ${new Date(endTime).toLocaleTimeString()}
+                 `).addTo(routeLayer);
+            }
+
+            // Odam harakatlangach, tahlil qilish uchun yangi nuqtani belgilaymiz
+            clusterStart = point;
+        }
+        lastPoint = point;
+    });
+
+    // MARSHRUT CHIZIG'I (Kiber ko'k neon effekt)
+    L.polyline(latlngs, {
+        color: '#00cfff',
+        weight: 3,
+        opacity: 0.8,
+        dashArray: '10, 10' // Kesilgan chiziq
+    }).addTo(routeLayer);
 }
 
 // ==========================================
