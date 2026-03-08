@@ -98,31 +98,38 @@ async function initSystem() {
     
     // Xarita turlari
     if (!map) {
-        // 1. MATRIX: Qora xakerlik uslubidagi xarita
+        // 1. MATRIX: Qora xakerlik xaritasi
         const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 });
         
-        // 2. SATELLITE: Toza kosmik rasm (Nomlarsiz)
-        const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
-        
-        // 3. GIBRID: Kosmik rasm + Ko'cha, bino va do'kon nomlari (Google Engine)
+        // ==========================================
+        // 2. SATELLITE (USTMA-UST QATLAM TEXNIKASI)
+        // ==========================================
+        // A) Faqat sof kosmik rasm (Tag qism)
+        const pureSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+        // B) Faqat yozuvlar va chegaralar (Shaffof ustki qism - Google API)
+        const onlyLabels = L.tileLayer('http://{s}.google.com/vt/lyrs=h&x={x}&y={y}&z={z}', {
+            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
+        // C) Ikkalasini bitta "Satellite" tugmasiga birlashtiramiz!
+        const satelliteWithLabels = L.layerGroup([pureSatellite, onlyLabels]);
+
+        // 3. GIBRID: Google'ning to'liq o'z xaritasi
         const hybridMap = L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-            maxZoom: 20,
-            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         });
 
-        // Boshlang'ich holatda Matrix ochiladi
+        // Boshlang'ich holat
         map = L.map('map', { layers: [darkMap] }).setView([41.3, 69.2], 3);
         
-        // 3 xil xaritani tanlash menyusiga qo'shamiz
+        // Menyuga qo'shish
         L.control.layers({
-            "MATRIX": darkMap, 
-            "SATELLITE (TOZA)": satelliteMap,
-            "GIBRID (NOMLAR)": hybridMap
+            "MATRIX (QORA)": darkMap, 
+            "SATELLITE (RASM + YOZUV)": satelliteWithLabels,
+            "GIBRID (GOOGLE)": hybridMap
         }).addTo(map);
         
         markers.addTo(map);
     }
-
     fetchVisitors();
     fetchChats();
     fetchMessages();
