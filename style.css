@@ -4,25 +4,30 @@ body { background-color: #050505; color: #00ff41; overflow: hidden; display: fle
 #matrixCanvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0.3; }
 .hidden { display: none !important; }
 
-/* LOGIN (Oldingidek) */
+/* LOGIN */
 .overlay { position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
 .login-box { border: 1px solid #00ff41; padding: 3rem; text-align: center; background: #000; }
 .login-box input, .login-box button { width: 100%; padding: 10px; margin: 10px 0; background: #000; color: #00ff41; border: 1px solid #00ff41; cursor: pointer;}
 .login-box button:hover { background: #00ff41; color: #000; }
 
-/* DASHBOARD LAYOUT */
+/* LAYOUT */
 #dashboard { display: flex; width: 100vw; height: 100vh; }
-
-/* SIDEBAR */
-.sidebar { width: 250px; border-right: 1px solid #00ff41; background: rgba(0,20,0,0.8); display: flex; flex-direction: column; }
+.sidebar { width: 260px; border-right: 1px solid #00ff41; background: rgba(0,20,0,0.8); display: flex; flex-direction: column; }
 .logo { font-size: 1.5rem; padding: 20px; border-bottom: 1px solid #00ff41; text-align: center;}
-.nav-menu { list-style: none; flex: 1; margin-top: 20px;}
+.nav-menu { list-style: none; flex: 1; margin-top: 10px;}
 .nav-menu li { padding: 15px 20px; cursor: pointer; border-left: 3px solid transparent; transition: 0.3s; position: relative;}
 .nav-menu li:hover, .nav-menu li.active { background: rgba(0,255,65,0.1); border-left: 3px solid #00ff41; }
 .logout-btn { padding: 15px; background: transparent; color: #ff003c; border: none; cursor: pointer; border-top: 1px solid #00ff41; }
 .badge { background: #ff003c; color: #fff; padding: 2px 6px; border-radius: 5px; font-size: 0.8rem; position: absolute; right: 20px; }
 
-/* CONTENT AREA */
+/* KILL SWITCH */
+.kill-switch-box { padding: 15px; text-align: center; border-bottom: 1px dashed #00ff41; }
+.kill-switch-box p { font-size: 0.8rem; color: #aaa; margin-bottom: 5px;}
+#killSwitchBtn { width: 100%; padding: 10px; font-weight: bold; border: 1px solid; cursor: pointer; transition: 0.3s; }
+.btn-on { background: rgba(0,255,65,0.2); color: #00ff41; border-color: #00ff41 !important; box-shadow: 0 0 10px #00ff41; }
+.btn-off { background: rgba(255,0,60,0.2); color: #ff003c; border-color: #ff003c !important; box-shadow: 0 0 10px #ff003c; }
+
+/* OYNALAR */
 .content-area { flex: 1; padding: 20px; overflow-y: auto; position: relative;}
 .panel-header { background: rgba(0,255,65,0.1); padding: 10px; border-bottom: 1px solid #00ff41; font-weight: bold; margin-bottom: 15px; }
 
@@ -32,27 +37,38 @@ body { background-color: #050505; color: #00ff41; overflow: hidden; display: fle
 .radar-scanline { position: absolute; top: 50px; left: 0; width: 100%; height: 5px; background: rgba(0,255,65,0.5); z-index: 1000; pointer-events: none; animation: scan 4s linear infinite; }
 @keyframes scan { 0% {top: 50px;} 50% {top: 100%;} 100% {top: 50px;} }
 
-/* JADVAL */
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th, td { padding: 12px; border-bottom: 1px solid rgba(0,255,65,0.2); }
+/* JADVAL (Yangi Ustunlar Dizayni) */
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;}
+th, td { padding: 12px 10px; border-bottom: 1px solid rgba(0,255,65,0.2); }
 .track-btn { background: transparent; color: #00cfff; border: 1px solid #00cfff; padding: 5px 10px; cursor: pointer; font-size: 0.8rem;}
 .track-btn:hover { background: #00cfff; color: #000; }
 
-/* CHAT KUZATUV */
+/* Status Chiroqchalari */
+.status-badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block;}
+.status-online { background: rgba(0,255,65,0.2); color: #00ff41; border: 1px solid #00ff41; animation: pulse 2s infinite; }
+.status-offline { background: rgba(255,0,60,0.2); color: #ff003c; border: 1px solid #ff003c; }
+
+/* Ruxsat Ikonkalari */
+.perm-icon { margin-right: 5px; font-size: 1.1rem; }
+.perm-yes { filter: grayscale(0) drop-shadow(0 0 5px #00ff41); }
+.perm-no { filter: grayscale(1) opacity(0.3); }
+
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,65,0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,255,65,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,65,0); } }
+
+/* CHAT VA MUROJAATLAR */
 .chat-container { display: flex; flex-direction: column; gap: 15px; }
 .chat-group { border: 1px dashed #00ff41; padding: 10px; background: rgba(0,0,0,0.5); }
 .chat-ip { color: #ff003c; font-size: 0.9rem; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;}
 .msg-bubble { margin-bottom: 8px; padding: 8px; border-radius: 4px; font-size: 0.9rem; max-width: 80%; }
 .user-txt { background: rgba(102,126,234,0.2); border-left: 3px solid #667eea; align-self: flex-start; }
 .ai-txt { background: rgba(0,255,65,0.1); border-left: 3px solid #00ff41; margin-left: auto; color: #aaa; }
-
-/* XABARLAR */
 .msg-container { display: grid; gap: 15px; }
 .msg-card { border: 1px solid #00ff41; padding: 15px; background: rgba(0,20,0,0.5); cursor: pointer;}
 .msg-card:hover { background: rgba(0,255,65,0.1); }
 .msg-title { color: #fff; font-size: 1.1rem; margin-bottom: 5px; }
 .msg-sender { color: #00cfff; font-size: 0.8rem; margin-bottom: 10px; }
-.msg-body { color: #aaa; font-size: 0.9rem; display: none; margin-top: 10px; border-top: 1px dashed #333; padding-top: 10px;}
+.msg-body { display: none; margin-top: 10px; border-top: 1px dashed #333; padding-top: 10px; color: #aaa;}
 .msg-card.open .msg-body { display: block; }
 
 ::-webkit-scrollbar { width: 8px; }
