@@ -25,20 +25,41 @@ setInterval(() => {
     }
 }, 30);
 
-// LOGIN TIZIMI
-const ADMIN_PASSWORD = "hakker777";
-function handleLogin(e) { if (e.key === 'Enter') checkPassword(); }
-function checkPassword() {
-    if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
+// ==========================================
+// 3. XAVFSIZLIK VA LOGIN TIZIMI (Yangilangan)
+// ==========================================
+const ADMIN_PASSWORD = "hakker777"; 
+
+// Sayt yangilanganda xotirani tekshirish
+window.onload = () => {
+    if (localStorage.getItem('radar_admin_auth') === 'true') {
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         initSystem();
+    }
+};
+
+function handleLogin(e) { if (e.key === 'Enter') checkPassword(); }
+
+function checkPassword() {
+    const input = document.getElementById('adminPassword').value;
+    const errorMsg = document.getElementById('loginError');
+    
+    if (input === ADMIN_PASSWORD) {
+        localStorage.setItem('radar_admin_auth', 'true'); // Parolni xotiraga yozish
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        initSystem(); 
     } else {
-        document.getElementById('loginError').innerText = "XATOLIK!";
-        setTimeout(() => document.getElementById('loginError').innerText = "", 2000);
+        errorMsg.innerText = "XATOLIK: PAROL NOTO'G'RI!";
+        setTimeout(() => { errorMsg.innerText = ""; }, 2000);
     }
 }
-function logout() { location.reload(); }
+
+function logout() {
+    localStorage.removeItem('radar_admin_auth'); // Xotiradan tozalash
+    location.reload();
+}
 
 // TAB MENU LOGIKASI (Sahifalar o'rtasida o'tish)
 function switchTab(tabId, element) {
