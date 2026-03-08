@@ -92,9 +92,6 @@ function updateKillSwitchUI() {
 // ==========================================
 let map; let markers = L.layerGroup();
 let visitorMarkers = {}; // Xaritadagi nishonlarni ID bo'yicha saqlash
-let map; 
-let markers = L.layerGroup();
-let visitorMarkers = {}; 
 let routeLayer = L.layerGroup(); // YAngi: Marshrut va bayroqlar qatlami
 
 async function initSystem() {
