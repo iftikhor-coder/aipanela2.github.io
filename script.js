@@ -98,10 +98,28 @@ async function initSystem() {
     
     // Xarita turlari
     if (!map) {
+        // 1. MATRIX: Qora xakerlik uslubidagi xarita
         const darkMap = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 });
+        
+        // 2. SATELLITE: Toza kosmik rasm (Nomlarsiz)
         const satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+        
+        // 3. GIBRID: Kosmik rasm + Ko'cha, bino va do'kon nomlari (Google Engine)
+        const hybridMap = L.tileLayer('http://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
+
+        // Boshlang'ich holatda Matrix ochiladi
         map = L.map('map', { layers: [darkMap] }).setView([41.3, 69.2], 3);
-        L.control.layers({"MATRIX": darkMap, "SATELLITE": satelliteMap}).addTo(map);
+        
+        // 3 xil xaritani tanlash menyusiga qo'shamiz
+        L.control.layers({
+            "MATRIX": darkMap, 
+            "SATELLITE (TOZA)": satelliteMap,
+            "GIBRID (NOMLAR)": hybridMap
+        }).addTo(map);
+        
         markers.addTo(map);
     }
 
