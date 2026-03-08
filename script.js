@@ -3,7 +3,7 @@
 // ==========================================
 // SHU YERGA O'ZINGIZNING SUPABASE KALITLARINGIZNI QO'YING
 const supabaseUrl = 'https://zazmjpbblmhxtuvsxpkv.supabase.co';
-const supabaseKey = 'sb_publishable_NHR_h-RGmqChWD8g7kyR5g_Vh_e5L5d';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inphem1qcGJibG1oeHR1dnN4cGt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MDAzOTgsImV4cCI6MjA4ODQ3NjM5OH0.SY4ZsJ0OJiiPGZaZP9EjEutUbe4QwzzuRE-vW-0F8J4';
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // 1. TIZIM VA LOGIN LOGIKASI
