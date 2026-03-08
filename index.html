@@ -21,9 +21,14 @@
     </div>
 
     <div id="dashboard" class="hidden">
-        
         <nav class="sidebar">
             <div class="logo">SYS<span>.ADMIN</span></div>
+            
+            <div class="kill-switch-box">
+                <p>TIZIM HOLATI:</p>
+                <button id="killSwitchBtn" class="btn-off" onclick="toggleTracking()">[ KUTILMOQDA... ]</button>
+            </div>
+
             <ul class="nav-menu">
                 <li class="active" onclick="switchTab('tab-map', this)">🌐 GLOBAL RADAR</li>
                 <li onclick="switchTab('tab-logs', this)">🗄️ QORA QUTI</li>
@@ -34,7 +39,6 @@
         </nav>
 
         <main class="content-area">
-            
             <section id="tab-map" class="tab-content active">
                 <div class="panel-header">>> RADAR_KUZATUV_TIZIMI</div>
                 <div class="radar-scanline"></div>
@@ -42,32 +46,32 @@
             </section>
 
             <section id="tab-logs" class="tab-content hidden">
-                <div class="panel-header">>> QURILMALAR_LOGI</div>
-                <table id="logsTable">
-                    <thead>
-                        <tr>
-                            <th>VAQT</th>
-                            <th>IP MANZIL</th>
-                            <th>QURILMA</th>
-                            <th>AMAL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logsBody"></tbody>
-                </table>
+                <div class="panel-header">>> NISHONLAR_VA_RUXSATLAR (LIVE)</div>
+                <div class="table-wrapper">
+                    <table id="logsTable">
+                        <thead>
+                            <tr>
+                                <th>IP MANZIL</th>
+                                <th>QURILMA</th>
+                                <th>RUXSATLAR</th>
+                                <th>HOLAT (LIVE)</th>
+                                <th>KUZATISH</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsBody"></tbody>
+                    </table>
+                </div>
             </section>
 
             <section id="tab-chat" class="tab-content hidden">
                 <div class="panel-header">>> AI_SUHBAT_JONLI_KUZATUV</div>
-                <div class="chat-container" id="chatContainer">
-                    </div>
+                <div class="chat-container" id="chatContainer"></div>
             </section>
 
             <section id="tab-msg" class="tab-content hidden">
                 <div class="panel-header">>> MAXFIY_XABARLAR_QUTISI</div>
-                <div class="msg-container" id="msgContainer">
-                    </div>
+                <div class="msg-container" id="msgContainer"></div>
             </section>
-
         </main>
     </div>
 
