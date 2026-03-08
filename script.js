@@ -241,3 +241,27 @@ function addMessageToUI(msg) {
     card.onclick = () => card.classList.toggle('open');
     container.insertBefore(card, container.firstChild);
 }
+
+async function fetchHoneypotLogs() {
+    const { data } = await supabaseClient.from('honeypot_logs').select('*').order('created_at', { ascending: false });
+    if(data) data.forEach(addHoneypotToUI);
+}
+
+function addHoneypotToUI(log) {
+    const tbody = document.getElementById('honeypotBody');
+    const row = document.createElement('tr');
+    row.style.background = "rgba(255, 0, 60, 0.1)"; // Hackerlarni qizilroq ko'rsatish
+    row.innerHTML = `
+        <td>${new Date(log.created_at).toLocaleTimeString()}</td>
+        <td style="color:#ff003c; font-weight:bold;">${log.visitor_ip}</td>
+        <td style="color:#ffcc00;">${log.trap_name}</td>
+        <td style="font-size:0.7rem; color:#aaa;">${log.user_agent}</td>
+    `;
+    tbody.insertBefore(row, tbody.firstChild);
+}
+
+// subscribeRealtime() funksiyasiga shuni qo'shing:
+// .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'honeypot_logs' }, payload => {
+//     addHoneypotToUI(payload.new);
+//     let badge = document.getElementById('honeypotBadge'); badge.innerText = parseInt(badge.innerText) + 1;
+// })
