@@ -231,7 +231,7 @@ function drawRouteAndFlags(historyData) {
     let clusterStart = historyData[0];
     let lastPoint = historyData[0];
 
-    // Yer shari radiusi bo'yicha metrda masofa hisoblovchi (Haversine formula)
+    // Yer shari radiusi bo'yicha masofa hisoblovchi (Haversine formula)
     function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3; const rad = Math.PI / 180;
         const dLat = (lat2 - lat1) * rad; const dLon = (lon2 - lon1) * rad;
@@ -240,13 +240,14 @@ function drawRouteAndFlags(historyData) {
         return R * c;
     }
 
-    historyData.forEach((point, index) => {
+    for (let i = 0; i < historyData.length; i++) {
+        let point = historyData[i];
         latlngs.push([point.lat, point.lon]);
 
-        let distance = getDistance(lastPoint.lat, lastPoint.lon, point.lat, point.lon);
+        let distance = getDistance(clusterStart.lat, clusterStart.lon, point.lat, point.lon);
 
-        // Agar 30 metrdan uzoqlashsa (harakatlansa) YOKI ro'yxat oxiriga yetsa
-        if (distance > 30 || index === historyData.length - 1) {
+        // Agar 50 metrdan uzoqlashsa (GPS sakrashlarini inkor qilamiz) YOKI bu eng oxirgi nuqta bo'lsa
+        if (distance > 50 || i === historyData.length - 1) {
             let startTime = new Date(clusterStart.recorded_at).getTime();
             let endTime = new Date(lastPoint.recorded_at).getTime();
             let diffMinutes = (endTime - startTime) / 1000 / 60; // Daqiqaga o'giramiz
@@ -255,16 +256,26 @@ function drawRouteAndFlags(historyData) {
             if (diffMinutes >= 5) {
                 const flagIcon = L.divIcon({
                     className: 'custom-flag',
-                    html: '<div style="font-size:20px; filter: drop-shadow(0 0 5px red);">🚩</div>',
-                    iconSize: [20, 20], iconAnchor: [10, 20]
+                    html: '<div style="font-size:24px; filter: drop-shadow(0 0 5px red);">🚩</div>',
+                    iconSize: [24, 24], iconAnchor: [12, 24]
                 });
                 
+                // Kun, sana va vaqtni formatlash
+                let startDateObj = new Date(startTime);
+                let sana = startDateObj.toLocaleDateString('uz-UZ'); // Masalan: 08.03.2026
+                let kelganVaqt = startDateObj.toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
+                let ketganVaqt = new Date(endTime).toLocaleTimeString('uz-UZ', {hour: '2-digit', minute:'2-digit'});
+
                 L.marker([clusterStart.lat, clusterStart.lon], { icon: flagIcon })
                  .bindPopup(`
-                    <b style="color:#ff003c;">DIQQAT: Uzoq to'xtash!</b><br>
-                    ⏳ Qolgan vaqti: <b>${Math.round(diffMinutes)} daqiqa</b><br>
-                    🕒 Keldi: ${new Date(startTime).toLocaleTimeString()}<br>
-                    🕒 Ketdi: ${new Date(endTime).toLocaleTimeString()}
+                    <div style="font-family: monospace; color: #fff; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #00ffcc; border-radius: 5px;">
+                        <b style="color:#ff003c; font-size: 14px;">🚩 UZOQ TO'XTASH (REPORT)</b><br>
+                        <hr style="border-color: #333; margin: 5px 0;">
+                        📅 <b>Sana:</b> ${sana}<br>
+                        ⏳ <b>Qolgan vaqti:</b> <span style="color:#00ffcc;">${Math.round(diffMinutes)} daqiqa</span><br>
+                        🕒 <b>Keldi:</b> ${kelganVaqt}<br>
+                        🕒 <b>Ketdi:</b> ${ketganVaqt}
+                    </div>
                  `).addTo(routeLayer);
             }
 
@@ -272,17 +283,16 @@ function drawRouteAndFlags(historyData) {
             clusterStart = point;
         }
         lastPoint = point;
-    });
+    }
 
-    // MARSHRUT CHIZIG'I (Kiber ko'k neon effekt)
+    // MARSHRUT CHIZIG'I 
     L.polyline(latlngs, {
-        color: '#00cfff',
-        weight: 3,
-        opacity: 0.8,
-        dashArray: '10, 10' // Kesilgan chiziq
+        color: '#00ffcc', // Chiziq rangini och yashil-ko'k qildik, yaxshiroq ko'rinishi uchun
+        weight: 4,
+        opacity: 0.9,
+        dashArray: '10, 10' 
     }).addTo(routeLayer);
 }
-
 // ==========================================
 // 4. SUPABASE REALTIME (JONLI KUZATUV)
 // ==========================================
